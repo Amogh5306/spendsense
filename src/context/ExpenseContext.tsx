@@ -1,7 +1,8 @@
 "use client";
 
-import { createContext, useContext, useState, ReactNode, useCallback } from "react";
+import { createContext, useContext, useState, useEffect, ReactNode, useCallback } from "react";
 import { Expense, UserProfile } from "@/lib/types";
+import { useAuth } from "@/context/AuthContext";
 
 // Demo data for showcasing the UI without Firebase
 const DEMO_EXPENSES: Expense[] = [
@@ -41,11 +42,21 @@ interface ExpenseContextType {
 const ExpenseContext = createContext<ExpenseContextType>({} as ExpenseContextType);
 
 export function ExpenseProvider({ children }: { children: ReactNode }) {
+  const { user } = useAuth();
   const [expenses, setExpenses] = useState<Expense[]>(DEMO_EXPENSES);
   const [profile, setProfile] = useState<UserProfile>({
     budget: 8000,
-    displayName: "Amogh Dey",
+    displayName: "Station Commander",
   });
+
+  useEffect(() => {
+    if (user) {
+      setProfile((prev) => ({
+        ...prev,
+        displayName: user.displayName || user.email?.split("@")[0] || "Station Commander",
+      }));
+    }
+  }, [user]);
 
   const addExpense = useCallback(
     (expense: Omit<Expense, "id" | "userId" | "createdAt">) => {
