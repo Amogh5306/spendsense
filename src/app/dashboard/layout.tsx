@@ -1,13 +1,33 @@
 "use client";
 
-import { ReactNode } from "react";
+import { ReactNode, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import Starfield from "@/components/Starfield";
 import Navbar from "@/components/Navbar";
 import ExpenseForm from "@/components/ExpenseForm";
 import { ExpenseProvider } from "@/context/ExpenseContext";
+import { useAuth } from "@/context/AuthContext";
 import { motion, AnimatePresence } from "framer-motion";
 
 export default function DashboardLayout({ children }: { children: ReactNode }) {
+  const { user, loading } = useAuth();
+  const router = useRouter();
+
+  useEffect(() => {
+    if (!loading && !user) {
+      router.push("/");
+    }
+  }, [user, loading, router]);
+
+  if (loading || !user) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <Starfield />
+        <div className="w-12 h-12 border-4 border-cyan-dim border-t-cyan-electric rounded-full animate-spin relative z-10" />
+      </div>
+    );
+  }
+
   return (
     <ExpenseProvider>
       <div className="relative min-h-screen">
