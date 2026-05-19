@@ -161,7 +161,7 @@ export function BarChart() {
                 bodyFont: { family: "var(--font-jetbrains)" },
                 bodyColor: "#00F5FF",
                 callbacks: {
-                  label: (ctx) => `₹${ctx.parsed.y.toLocaleString("en-IN")}`,
+                  label: (ctx) => `₹${(ctx.parsed.y || 0).toLocaleString("en-IN")}`,
                 },
               },
             },
@@ -236,7 +236,7 @@ export function LineChart() {
                 bodyFont: { family: "var(--font-jetbrains)" },
                 bodyColor: "#B8FF00",
                 callbacks: {
-                  label: (ctx) => `₹${ctx.parsed.y.toLocaleString("en-IN")}`,
+                  label: (ctx) => `₹${(ctx.parsed.y || 0).toLocaleString("en-IN")}`,
                 },
               },
             },

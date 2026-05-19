@@ -1,7 +1,7 @@
 "use client";
 
 import { createContext, useContext, useState, ReactNode, useCallback } from "react";
-import { Expense, Category, UserProfile } from "@/lib/types";
+import { Expense, UserProfile } from "@/lib/types";
 
 // Demo data for showcasing the UI without Firebase
 const DEMO_EXPENSES: Expense[] = [

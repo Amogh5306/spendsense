@@ -6,7 +6,7 @@ import TransactionList from "@/components/TransactionList";
 import { useExpenses } from "@/context/ExpenseContext";
 
 export default function DashboardPage() {
-  const { totalSpent, budgetLeft, topCategory, avgDaily, profile } =
+  const { totalSpent, budgetLeft, avgDaily, profile } =
     useExpenses();
 
   const budgetPercent = Math.round((totalSpent / profile.budget) * 100);
