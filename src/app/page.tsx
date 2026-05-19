@@ -1,21 +1,70 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import Starfield from "@/components/Starfield";
+import { useAuth } from "@/context/AuthContext";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isSignUp, setIsSignUp] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  
   const router = useRouter();
+  const { user, signIn, signUp, loading } = useAuth();
 
-  const handleSubmit = (e: React.FormEvent) => {
+  // If user is already logged in, push to dashboard
+  useEffect(() => {
+    if (user && !loading) {
+      router.push("/dashboard");
+    }
+  }, [user, loading, router]);
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Demo mode — skip auth, go straight to dashboard
-    router.push("/dashboard");
+    if (!email || !password) {
+      setError("Please provide both email and password.");
+      return;
+    }
+
+    setError(null);
+    setIsSubmitting(true);
+
+    try {
+      if (isSignUp) {
+        await signUp(email, password);
+      } else {
+        await signIn(email, password);
+      }
+      // Router push is handled by useEffect when 'user' changes
+    } catch (err: any) {
+      // Clean up firebase error messages
+      let errorMsg = "Authentication failed.";
+      if (err.code === "auth/invalid-credential" || err.code === "auth/wrong-password") {
+        errorMsg = "Invalid pilot credentials. Access denied.";
+      } else if (err.code === "auth/email-already-in-use") {
+        errorMsg = "This pilot is already registered.";
+      } else if (err.code === "auth/weak-password") {
+        errorMsg = "Security protocol failure. Password must be at least 6 characters.";
+      } else if (err.code) {
+        errorMsg = err.message;
+      }
+      setError(errorMsg);
+      setIsSubmitting(false);
+    }
   };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <Starfield />
+        <div className="w-12 h-12 border-4 border-cyan-dim border-t-cyan-electric rounded-full animate-spin relative z-10" />
+      </div>
+    );
+  }
 
   return (
     <div className="relative min-h-screen flex items-center justify-center overflow-hidden">
@@ -50,15 +99,15 @@ export default function LoginPage() {
               <span className="text-ghost-white">SPEND</span>
               <span className="glow-cyan">SENSE</span>
             </h1>
-            <p className="font-barlow text-silver-steel text-sm tracking-widest">
-              MISSION CONTROL FOR YOUR FINANCES
+            <p className="font-barlow text-silver-steel text-sm tracking-widest uppercase">
+              Enter clearance credentials
             </p>
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-5">
             <div>
               <label className="text-xs font-barlow font-semibold tracking-widest text-silver-steel block mb-2">
-                EMAIL
+                PILOT ID (EMAIL)
               </label>
               <input
                 type="email"
@@ -66,12 +115,13 @@ export default function LoginPage() {
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="pilot@spendsense.io"
                 className="input-glow"
+                disabled={isSubmitting}
               />
             </div>
 
             <div>
               <label className="text-xs font-barlow font-semibold tracking-widest text-silver-steel block mb-2">
-                PASSWORD
+                AUTHORIZATION CODE (PASSWORD)
               </label>
               <input
                 type="password"
@@ -79,40 +129,54 @@ export default function LoginPage() {
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="••••••••••"
                 className="input-glow"
+                disabled={isSubmitting}
               />
             </div>
 
+            {error && (
+              <motion.div 
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: "auto" }}
+                className="text-red-400 font-barlow text-sm font-semibold tracking-wide text-center"
+                style={{ textShadow: "0 0 10px rgba(255,60,60,0.4)" }}
+              >
+                ⚠ {error}
+              </motion.div>
+            )}
+
             <motion.button
               type="submit"
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
-              className="w-full py-4 rounded-xl font-orbitron text-sm tracking-widest font-bold transition-all duration-300 mt-4"
+              disabled={isSubmitting}
+              whileHover={!isSubmitting ? { scale: 1.02 } : {}}
+              whileTap={!isSubmitting ? { scale: 0.98 } : {}}
+              className="w-full py-4 rounded-xl font-orbitron text-sm tracking-widest font-bold transition-all duration-300 mt-4 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
               style={{
                 background: "#FF6B2B",
                 color: "#050A0E",
-                boxShadow: "0 0 30px rgba(255, 107, 43, 0.4)",
+                boxShadow: isSubmitting ? "none" : "0 0 30px rgba(255, 107, 43, 0.4)",
               }}
             >
-              {isSignUp ? "CREATE ACCOUNT" : "LAUNCH SESSION"}
+              {isSubmitting ? (
+                <div className="w-5 h-5 border-2 border-space-deep border-t-transparent rounded-full animate-spin" />
+              ) : (
+                isSignUp ? "INITIALIZE ACCOUNT" : "AUTHENTICATE"
+              )}
             </motion.button>
           </form>
 
           <div className="mt-6 text-center">
             <button
-              onClick={() => setIsSignUp(!isSignUp)}
-              className="font-barlow text-sm text-silver-steel hover:text-cyan-electric transition-colors"
+              onClick={() => {
+                setIsSignUp(!isSignUp);
+                setError(null);
+              }}
+              className="font-barlow text-sm text-silver-steel hover:text-cyan-electric transition-colors uppercase tracking-wider"
+              disabled={isSubmitting}
             >
               {isSignUp
-                ? "Already have an account? Sign in"
-                : "New pilot? Create account"}
+                ? "Return to authentication"
+                : "Register new pilot"}
             </button>
-          </div>
-
-          {/* Demo note */}
-          <div className="mt-6 pt-4 border-t border-cyan-dim text-center">
-            <p className="font-barlow text-xs text-silver-steel/60">
-              Demo mode — click launch to enter with sample data
-            </p>
           </div>
         </div>
       </motion.div>

@@ -3,9 +3,13 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
 import { useExpenses } from "@/context/ExpenseContext";
+import { useAuth } from "@/context/AuthContext";
+import { useRouter } from "next/navigation";
 
 export default function ProfilePage() {
   const { profile, updateProfile } = useExpenses();
+  const { signOut } = useAuth();
+  const router = useRouter();
   const [budget, setBudget] = useState(profile.budget);
   const [name, setName] = useState(profile.displayName);
   const [saved, setSaved] = useState(false);
@@ -143,6 +147,25 @@ export default function ProfilePage() {
         >
           {saved ? "✓ SAVED" : "SAVE CONFIGURATION"}
         </motion.button>
+      </motion.div>
+
+      {/* Disconnect button */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.3 }}
+        className="flex justify-center mt-8"
+      >
+        <button
+          onClick={async () => {
+            await signOut();
+            router.push("/");
+          }}
+          className="px-8 py-3 rounded-xl font-orbitron text-xs tracking-widest font-bold border border-red-500/30 text-red-400 hover:bg-red-500/10 transition-all duration-300"
+          style={{ textShadow: "0 0 10px rgba(255,60,60,0.5)" }}
+        >
+          DISCONNECT SESSION
+        </button>
       </motion.div>
 
     </div>

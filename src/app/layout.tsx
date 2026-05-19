@@ -27,6 +27,8 @@ export const metadata: Metadata = {
     "A futuristic expense tracking dashboard for students. Monitor your spending from orbit.",
 };
 
+import { AuthProvider } from "@/context/AuthContext";
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -38,7 +40,9 @@ export default function RootLayout({
       className={`${orbitron.variable} ${jetbrains.variable} ${barlow.variable}`}
     >
       <body className="font-barlow text-ghost-white antialiased">
-        {children}
+        <AuthProvider>
+          {children}
+        </AuthProvider>
       </body>
     </html>
   );
