@@ -40,7 +40,7 @@ export default function LoginPage() {
         await signIn(email, password);
       }
       // Router push is handled by useEffect when 'user' changes
-    } catch (err: any) {
+    } catch (err: any) { // eslint-disable-line @typescript-eslint/no-explicit-any
       // Clean up firebase error messages
       let errorMsg = "Authentication failed.";
       if (err.code === "auth/invalid-credential" || err.code === "auth/wrong-password") {
