@@ -3,25 +3,18 @@
 import { createContext, useContext, useState, useEffect, ReactNode, useCallback } from "react";
 import { Expense, UserProfile } from "@/lib/types";
 import { useAuth } from "@/context/AuthContext";
-
-// Demo data for showcasing the UI without Firebase
-const DEMO_EXPENSES: Expense[] = [
-  { id: "1", amount: 250, category: "Food", date: "2026-05-19", notes: "Lunch at campus canteen", userId: "demo", createdAt: Date.now() - 86400000 * 0 },
-  { id: "2", amount: 150, category: "Transport", date: "2026-05-18", notes: "Metro pass recharge", userId: "demo", createdAt: Date.now() - 86400000 * 1 },
-  { id: "3", amount: 1200, category: "Academics", date: "2026-05-17", notes: "Reference textbook", userId: "demo", createdAt: Date.now() - 86400000 * 2 },
-  { id: "4", amount: 500, category: "Entertainment", date: "2026-05-16", notes: "Movie night with friends", userId: "demo", createdAt: Date.now() - 86400000 * 3 },
-  { id: "5", amount: 350, category: "Food", date: "2026-05-15", notes: "Dinner at Dominos", userId: "demo", createdAt: Date.now() - 86400000 * 4 },
-  { id: "6", amount: 199, category: "Subscriptions", date: "2026-05-14", notes: "Spotify Premium", userId: "demo", createdAt: Date.now() - 86400000 * 5 },
-  { id: "7", amount: 800, category: "Shopping", date: "2026-05-13", notes: "New earphones", userId: "demo", createdAt: Date.now() - 86400000 * 6 },
-  { id: "8", amount: 120, category: "Transport", date: "2026-05-12", notes: "Auto to college", userId: "demo", createdAt: Date.now() - 86400000 * 7 },
-  { id: "9", amount: 450, category: "Food", date: "2026-05-11", notes: "Weekly groceries", userId: "demo", createdAt: Date.now() - 86400000 * 8 },
-  { id: "10", amount: 300, category: "Entertainment", date: "2026-05-10", notes: "Gaming subscription", userId: "demo", createdAt: Date.now() - 86400000 * 9 },
-  { id: "11", amount: 680, category: "Academics", date: "2026-05-09", notes: "Online course - Udemy", userId: "demo", createdAt: Date.now() - 86400000 * 10 },
-  { id: "12", amount: 90, category: "Miscellaneous", date: "2026-05-08", notes: "Phone cover", userId: "demo", createdAt: Date.now() - 86400000 * 11 },
-  { id: "13", amount: 550, category: "Food", date: "2026-05-07", notes: "Birthday treat", userId: "demo", createdAt: Date.now() - 86400000 * 12 },
-  { id: "14", amount: 200, category: "Transport", date: "2026-05-06", notes: "Uber ride", userId: "demo", createdAt: Date.now() - 86400000 * 13 },
-  { id: "15", amount: 1500, category: "Shopping", date: "2026-05-05", notes: "New backpack", userId: "demo", createdAt: Date.now() - 86400000 * 14 },
-];
+import { db } from "@/lib/firebase";
+import {
+  collection,
+  addDoc,
+  deleteDoc,
+  doc,
+  onSnapshot,
+  query,
+  orderBy,
+  setDoc,
+  getDoc,
+} from "firebase/firestore";
 
 interface ExpenseContextType {
   expenses: Expense[];
@@ -37,53 +30,102 @@ interface ExpenseContextType {
   categoryTotals: Record<string, number>;
   monthlyTotals: number[];
   trendData: number[];
+  isLoading: boolean;
 }
 
 const ExpenseContext = createContext<ExpenseContextType>({} as ExpenseContextType);
 
 export function ExpenseProvider({ children }: { children: ReactNode }) {
   const { user } = useAuth();
-  const [expenses, setExpenses] = useState<Expense[]>(DEMO_EXPENSES);
+  const [expenses, setExpenses] = useState<Expense[]>([]);
   const [profile, setProfile] = useState<UserProfile>({
     budget: 8000,
     displayName: "Station Commander",
   });
+  const [isLoading, setIsLoading] = useState(true);
 
+  // Load profile from Firestore
   useEffect(() => {
-    if (user) {
-      setProfile((prev) => ({
-        ...prev,
-        displayName: user.displayName || user.email?.split("@")[0] || "Station Commander",
-      }));
-    }
+    if (!user) return;
+
+    const loadProfile = async () => {
+      const profileRef = doc(db, "users", user.uid, "settings", "profile");
+      const snap = await getDoc(profileRef);
+      if (snap.exists()) {
+        setProfile(snap.data() as UserProfile);
+      } else {
+        // First time user — create default profile
+        const defaultProfile: UserProfile = {
+          budget: 8000,
+          displayName: user.displayName || user.email?.split("@")[0] || "Station Commander",
+        };
+        await setDoc(profileRef, defaultProfile);
+        setProfile(defaultProfile);
+      }
+    };
+
+    loadProfile();
+  }, [user]);
+
+  // Real-time listener for expenses from Firestore
+  useEffect(() => {
+    if (!user) return;
+
+    setIsLoading(true);
+    const q = query(
+      collection(db, "users", user.uid, "expenses"),
+      orderBy("createdAt", "desc")
+    );
+
+    const unsubscribe = onSnapshot(q, (snapshot) => {
+      const data: Expense[] = snapshot.docs.map((d) => ({
+        id: d.id,
+        ...d.data(),
+      })) as Expense[];
+      setExpenses(data);
+      setIsLoading(false);
+    });
+
+    return () => unsubscribe();
   }, [user]);
 
   const addExpense = useCallback(
-    (expense: Omit<Expense, "id" | "userId" | "createdAt">) => {
-      const newExpense: Expense = {
+    async (expense: Omit<Expense, "id" | "userId" | "createdAt">) => {
+      if (!user) return;
+      await addDoc(collection(db, "users", user.uid, "expenses"), {
         ...expense,
-        id: `exp-${Date.now()}`,
-        userId: "demo",
+        userId: user.uid,
         createdAt: Date.now(),
-      };
-      setExpenses((prev) => [newExpense, ...prev]);
+      });
     },
-    []
+    [user]
   );
 
-  const deleteExpense = useCallback((id: string) => {
-    setExpenses((prev) => prev.filter((e) => e.id !== id));
-  }, []);
+  const deleteExpense = useCallback(
+    async (id: string) => {
+      if (!user) return;
+      await deleteDoc(doc(db, "users", user.uid, "expenses", id));
+    },
+    [user]
+  );
 
-  const updateExpense = useCallback((id: string, data: Partial<Expense>) => {
-    setExpenses((prev) =>
-      prev.map((e) => (e.id === id ? { ...e, ...data } : e))
-    );
-  }, []);
+  const updateExpense = useCallback(
+    async (id: string, data: Partial<Expense>) => {
+      if (!user) return;
+      await setDoc(doc(db, "users", user.uid, "expenses", id), data, { merge: true });
+    },
+    [user]
+  );
 
-  const updateProfile = useCallback((data: Partial<UserProfile>) => {
-    setProfile((prev) => ({ ...prev, ...data }));
-  }, []);
+  const updateProfile = useCallback(
+    async (data: Partial<UserProfile>) => {
+      if (!user) return;
+      const profileRef = doc(db, "users", user.uid, "settings", "profile");
+      await setDoc(profileRef, data, { merge: true });
+      setProfile((prev) => ({ ...prev, ...data }));
+    },
+    [user]
+  );
 
   // Computed values
   const totalSpent = expenses.reduce((sum, e) => sum + e.amount, 0);
@@ -99,8 +141,8 @@ export function ExpenseProvider({ children }: { children: ReactNode }) {
     (a, b) => b[1] - a[1]
   )[0]?.[0] || "None";
 
-  // Monthly totals for bar chart (last 6 months)
-  const monthlyTotals = [3200, 4100, 3800, 5200, 4600, totalSpent];
+  // Monthly totals for bar chart (last 6 months simulated)
+  const monthlyTotals = [0, 0, 0, 0, 0, totalSpent];
 
   // Trend data for line chart (last 14 days)
   const trendData = expenses
@@ -124,6 +166,7 @@ export function ExpenseProvider({ children }: { children: ReactNode }) {
         categoryTotals,
         monthlyTotals,
         trendData,
+        isLoading,
       }}
     >
       {children}

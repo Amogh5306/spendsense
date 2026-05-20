@@ -11,6 +11,7 @@ export default function LoginPage() {
   const [password, setPassword] = useState("");
   const [isSignUp, setIsSignUp] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [infoMessage, setInfoMessage] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   
   const router = useRouter();
@@ -31,11 +32,17 @@ export default function LoginPage() {
     }
 
     setError(null);
+    setInfoMessage(null);
     setIsSubmitting(true);
 
     try {
       if (isSignUp) {
         await signUp(email, password);
+        setInfoMessage("Security protocol initiated. Verification link sent to your email.");
+        setIsSignUp(false);
+        setEmail("");
+        setPassword("");
+        setIsSubmitting(false);
       } else {
         await signIn(email, password);
       }
@@ -49,6 +56,8 @@ export default function LoginPage() {
         errorMsg = "This pilot is already registered.";
       } else if (err.code === "auth/weak-password") {
         errorMsg = "Security protocol failure. Password must be at least 6 characters.";
+      } else if (err.code === "auth/email-not-verified") {
+        errorMsg = "Access restricted. Please verify your email via the link sent to your inbox.";
       } else if (err.code) {
         errorMsg = err.message;
       }
@@ -141,6 +150,17 @@ export default function LoginPage() {
                 style={{ textShadow: "0 0 10px rgba(255,60,60,0.4)" }}
               >
                 ⚠ {error}
+              </motion.div>
+            )}
+
+            {infoMessage && (
+              <motion.div 
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: "auto" }}
+                className="text-lime-400 font-barlow text-sm font-semibold tracking-wide text-center"
+                style={{ textShadow: "0 0 10px rgba(184,255,0,0.4)" }}
+              >
+                ✓ {infoMessage}
               </motion.div>
             )}
 
