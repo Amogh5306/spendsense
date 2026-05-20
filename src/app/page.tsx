@@ -10,12 +10,13 @@ export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isSignUp, setIsSignUp] = useState(false);
+  const [isForgotPassword, setIsForgotPassword] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [infoMessage, setInfoMessage] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   
   const router = useRouter();
-  const { user, signIn, signUp, loading } = useAuth();
+  const { user, signIn, signUp, loading, resetPassword } = useAuth();
 
   // If user is already logged in, push to dashboard
   useEffect(() => {
@@ -26,6 +27,35 @@ export default function LoginPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    if (isForgotPassword) {
+      if (!email) {
+        setError("Please provide your pilot ID (email) to reset password.");
+        return;
+      }
+      setError(null);
+      setInfoMessage(null);
+      setIsSubmitting(true);
+      try {
+        await resetPassword(email);
+        setInfoMessage("Reset instructions dispatched. Check your communication channels.");
+        setIsForgotPassword(false);
+        setIsSubmitting(false);
+      } catch (err: any) { // eslint-disable-line @typescript-eslint/no-explicit-any
+        let errorMsg = "Password reset failed.";
+        if (err.code === "auth/user-not-found") {
+          errorMsg = "No pilot registered with this ID.";
+        } else if (err.code === "auth/invalid-email") {
+          errorMsg = "Invalid email format.";
+        } else if (err.code) {
+          errorMsg = err.message;
+        }
+        setError(errorMsg);
+        setIsSubmitting(false);
+      }
+      return;
+    }
+
     if (!email || !password) {
       setError("Please provide both email and password.");
       return;
@@ -109,7 +139,7 @@ export default function LoginPage() {
               <span className="glow-cyan">SENSE</span>
             </h1>
             <p className="font-barlow text-silver-steel text-sm tracking-widest uppercase">
-              Enter clearance credentials
+              {isForgotPassword ? "Reset authorization code" : "Enter clearance credentials"}
             </p>
           </div>
 
@@ -128,19 +158,36 @@ export default function LoginPage() {
               />
             </div>
 
-            <div>
-              <label className="text-xs font-barlow font-semibold tracking-widest text-silver-steel block mb-2">
-                AUTHORIZATION CODE (PASSWORD)
-              </label>
-              <input
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder="••••••••••"
-                className="input-glow"
-                disabled={isSubmitting}
-              />
-            </div>
+            {!isForgotPassword && (
+              <div>
+                <div className="flex justify-between items-center mb-2">
+                  <label className="text-xs font-barlow font-semibold tracking-widest text-silver-steel block">
+                    AUTHORIZATION CODE (PASSWORD)
+                  </label>
+                  {!isSignUp && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setIsForgotPassword(true);
+                        setError(null);
+                        setInfoMessage(null);
+                      }}
+                      className="text-[10px] font-barlow text-silver-steel hover:text-cyan-electric tracking-wider uppercase transition-colors"
+                    >
+                      Forgot code?
+                    </button>
+                  )}
+                </div>
+                <input
+                  type="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="••••••••••"
+                  className="input-glow"
+                  disabled={isSubmitting}
+                />
+              </div>
+            )}
 
             {error && (
               <motion.div 
@@ -179,24 +226,43 @@ export default function LoginPage() {
               {isSubmitting ? (
                 <div className="w-5 h-5 border-2 border-space-deep border-t-transparent rounded-full animate-spin" />
               ) : (
-                isSignUp ? "INITIALIZE ACCOUNT" : "AUTHENTICATE"
+                isForgotPassword
+                  ? "RESET PASSWORD"
+                  : isSignUp
+                  ? "INITIALIZE ACCOUNT"
+                  : "AUTHENTICATE"
               )}
             </motion.button>
           </form>
 
           <div className="mt-6 text-center">
-            <button
-              onClick={() => {
-                setIsSignUp(!isSignUp);
-                setError(null);
-              }}
-              className="font-barlow text-sm text-silver-steel hover:text-cyan-electric transition-colors uppercase tracking-wider"
-              disabled={isSubmitting}
-            >
-              {isSignUp
-                ? "Return to authentication"
-                : "Register new pilot"}
-            </button>
+            {isForgotPassword ? (
+              <button
+                onClick={() => {
+                  setIsForgotPassword(false);
+                  setError(null);
+                  setInfoMessage(null);
+                }}
+                className="font-barlow text-sm text-silver-steel hover:text-cyan-electric transition-colors uppercase tracking-wider"
+                disabled={isSubmitting}
+              >
+                Return to authentication
+              </button>
+            ) : (
+              <button
+                onClick={() => {
+                  setIsSignUp(!isSignUp);
+                  setError(null);
+                  setInfoMessage(null);
+                }}
+                className="font-barlow text-sm text-silver-steel hover:text-cyan-electric transition-colors uppercase tracking-wider"
+                disabled={isSubmitting}
+              >
+                {isSignUp
+                  ? "Return to authentication"
+                  : "Register new pilot"}
+              </button>
+            )}
           </div>
         </div>
       </motion.div>
