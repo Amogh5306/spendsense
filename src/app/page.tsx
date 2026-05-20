@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
-import Starfield from "@/components/Starfield";
+import { BackgroundPaths } from "@/components/ui/background-paths";
 import { useAuth } from "@/context/AuthContext";
 
 export default function LoginPage() {
@@ -98,26 +98,14 @@ export default function LoginPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <Starfield />
+      <BackgroundPaths>
         <div className="w-12 h-12 border-4 border-cyan-dim border-t-cyan-electric rounded-full animate-spin relative z-10" />
-      </div>
+      </BackgroundPaths>
     );
   }
 
   return (
-    <div className="relative min-h-screen flex items-center justify-center overflow-hidden">
-      <Starfield />
-
-      {/* Diagonal grid overlay */}
-      <div
-        className="fixed inset-0 pointer-events-none opacity-[0.03] z-[1]"
-        style={{
-          backgroundImage:
-            "repeating-linear-gradient(15deg, transparent, transparent 40px, rgba(0,245,255,0.15) 40px, rgba(0,245,255,0.15) 41px)",
-        }}
-      />
-
+    <BackgroundPaths>
       {/* Floating login card */}
       <motion.div
         initial={{ opacity: 0, y: 40, scale: 0.95 }}
@@ -266,6 +254,6 @@ export default function LoginPage() {
           </div>
         </div>
       </motion.div>
-    </div>
+    </BackgroundPaths>
   );
 }
