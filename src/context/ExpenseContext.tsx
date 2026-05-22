@@ -105,9 +105,9 @@ export function ExpenseProvider({ children }: { children: ReactNode }) {
           userId: user.uid,
           createdAt: Date.now(),
         });
-      } catch (error: any) {
+      } catch (error) {
         console.error("Error adding expense:", error);
-        alert(`Failed to save expense: ${error.message}`);
+        alert(`Failed to save expense: ${error instanceof Error ? error.message : "Unknown error"}`);
       }
     },
     [user]
@@ -118,9 +118,9 @@ export function ExpenseProvider({ children }: { children: ReactNode }) {
       if (!user) return;
       try {
         await deleteDoc(doc(db, "users", user.uid, "expenses", id));
-      } catch (error: any) {
+      } catch (error) {
         console.error("Error deleting expense:", error);
-        alert(`Failed to delete: ${error.message}`);
+        alert(`Failed to delete: ${error instanceof Error ? error.message : "Unknown error"}`);
       }
     },
     [user]
