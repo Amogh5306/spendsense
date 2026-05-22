@@ -22,6 +22,23 @@ export default function CountUp({
   const hasAnimated = useRef(false);
 
   useEffect(() => {
+    // If it has already animated and end changes, animate from current count to new end
+    if (hasAnimated.current) {
+      const start = count;
+      const startTime = performance.now();
+      const animate = (currentTime: number) => {
+        const elapsed = currentTime - startTime;
+        const progress = Math.min(elapsed / duration, 1);
+        const eased = 1 - Math.pow(1 - progress, 4);
+        setCount(Math.round(start + (end - start) * eased));
+        if (progress < 1) {
+          requestAnimationFrame(animate);
+        }
+      };
+      requestAnimationFrame(animate);
+      return;
+    }
+
     const observer = new IntersectionObserver(
       ([entry]) => {
         if (entry.isIntersecting && !hasAnimated.current) {
@@ -32,7 +49,6 @@ export default function CountUp({
           const animate = (currentTime: number) => {
             const elapsed = currentTime - startTime;
             const progress = Math.min(elapsed / duration, 1);
-            // easeOutQuart
             const eased = 1 - Math.pow(1 - progress, 4);
             setCount(Math.round(start + (end - start) * eased));
 
