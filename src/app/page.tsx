@@ -147,24 +147,24 @@ export default function LoginPage() {
           <div className="text-center mb-10">
             <h1 className="font-orbitron text-4xl font-bold tracking-wider mb-2">
               <span className="text-ghost-white">SPEND</span>
-              <span className="glow-cyan">SENSE</span>
+              <span className="text-cyan-electric">SENSE</span>
             </h1>
-            <p className="font-barlow text-silver-steel text-sm tracking-widest uppercase">
-              {isForgotPassword ? "Reset authorization code" : "Enter clearance credentials"}
+            <p className="font-barlow text-silver-steel text-base">
+              {isForgotPassword ? "Reset your password" : "Sign in to your account"}
             </p>
           </div>
 
           {/* Form Content */}
-          <div className="space-y-5">
+          <div className="space-y-6">
             {!isForgotPassword && !isSignUp && (
               <>
                 <motion.button
                   type="button"
                   onClick={handleGoogleSubmit}
                   disabled={isSubmitting}
-                  whileHover={!isSubmitting ? { scale: 1.02 } : {}}
+                  whileHover={!isSubmitting ? { scale: 1.02, backgroundColor: "#f3f4f6" } : {}}
                   whileTap={!isSubmitting ? { scale: 0.98 } : {}}
-                  className="w-full py-4 rounded-xl font-orbitron text-sm tracking-widest font-bold transition-all duration-300 flex items-center justify-center gap-3 bg-white text-black hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="w-full py-3.5 rounded-xl font-barlow text-[15px] font-semibold transition-all duration-300 flex items-center justify-center gap-3 bg-white text-gray-900 shadow-sm border border-gray-200 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                     <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
@@ -172,12 +172,12 @@ export default function LoginPage() {
                     <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
                     <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
                   </svg>
-                  SIGN IN WITH GOOGLE
+                  Continue with Google
                 </motion.button>
                 
                 <div className="flex items-center gap-4 py-2">
                   <div className="flex-1 h-px bg-white/10"></div>
-                  <span className="font-orbitron text-xs text-white/30 tracking-widest">OR EMAIL</span>
+                  <span className="font-barlow text-sm text-white/40">or continue with email</span>
                   <div className="flex-1 h-px bg-white/10"></div>
                 </div>
               </>
@@ -185,15 +185,15 @@ export default function LoginPage() {
 
             <form onSubmit={handleEmailSubmit} className="space-y-5">
               <div>
-                <label className="text-xs font-barlow font-semibold tracking-widest text-silver-steel block mb-2">
-                  PILOT ID (EMAIL)
+                <label className="text-sm font-barlow text-ghost-white block mb-2">
+                  Email address
                 </label>
                 <input
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  placeholder="pilot@spendsense.io"
-                  className="input-glow"
+                  placeholder="you@example.com"
+                  className="input-premium"
                   disabled={isSubmitting}
                 />
               </div>
@@ -201,8 +201,8 @@ export default function LoginPage() {
               {!isForgotPassword && (
                 <div>
                   <div className="flex justify-between items-center mb-2">
-                    <label className="text-xs font-barlow font-semibold tracking-widest text-silver-steel block">
-                      AUTHORIZATION CODE (PASSWORD)
+                    <label className="text-sm font-barlow text-ghost-white block">
+                      Password
                     </label>
                     {!isSignUp && (
                       <button
@@ -212,9 +212,9 @@ export default function LoginPage() {
                           setError(null);
                           setInfoMessage(null);
                         }}
-                        className="text-[10px] font-barlow text-silver-steel hover:text-cyan-electric tracking-wider uppercase transition-colors"
+                        className="text-sm font-barlow text-silver-steel hover:text-white transition-colors"
                       >
-                        Forgot code?
+                        Forgot password?
                       </button>
                     )}
                   </div>
@@ -222,8 +222,8 @@ export default function LoginPage() {
                     type="password"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    placeholder="••••••••••"
-                    className="input-glow"
+                    placeholder="••••••••"
+                    className="input-premium"
                     disabled={isSubmitting}
                   />
                 </div>
@@ -233,10 +233,9 @@ export default function LoginPage() {
                 <motion.div 
                   initial={{ opacity: 0, height: 0 }}
                   animate={{ opacity: 1, height: "auto" }}
-                  className="text-red-400 font-barlow text-sm font-semibold tracking-wide text-center"
-                  style={{ textShadow: "0 0 10px rgba(255,60,60,0.4)" }}
+                  className="text-red-400 font-barlow text-sm text-center bg-red-500/10 py-2 rounded-lg border border-red-500/20"
                 >
-                  ⚠ {error}
+                  {error}
                 </motion.div>
               )}
 
@@ -244,33 +243,33 @@ export default function LoginPage() {
                 <motion.div 
                   initial={{ opacity: 0, height: 0 }}
                   animate={{ opacity: 1, height: "auto" }}
-                  className="text-lime-400 font-barlow text-sm font-semibold tracking-wide text-center"
-                  style={{ textShadow: "0 0 10px rgba(184,255,0,0.4)" }}
+                  className="text-green-400 font-barlow text-sm text-center bg-green-500/10 py-2 rounded-lg border border-green-500/20"
                 >
-                  ✓ {infoMessage}
+                  {infoMessage}
                 </motion.div>
               )}
 
               <motion.button
                 type="submit"
                 disabled={isSubmitting}
-                whileHover={!isSubmitting ? { scale: 1.02 } : {}}
-                whileTap={!isSubmitting ? { scale: 0.98 } : {}}
-                className="w-full py-4 rounded-xl font-orbitron text-sm tracking-widest font-bold transition-all duration-300 mt-4 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                whileHover={!isSubmitting ? { scale: 1.01 } : {}}
+                whileTap={!isSubmitting ? { scale: 0.99 } : {}}
+                className="w-full py-3.5 rounded-xl font-barlow text-[16px] font-semibold transition-all duration-300 mt-2 disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                 style={{
-                  background: "#FF6B2B",
-                  color: "#050A0E",
-                  boxShadow: isSubmitting ? "none" : "0 0 30px rgba(255, 107, 43, 0.4)",
+                  background: "linear-gradient(180deg, #1f2937 0%, #111827 100%)",
+                  border: "1px solid rgba(255, 255, 255, 0.1)",
+                  color: "#ffffff",
+                  boxShadow: "0 4px 12px rgba(0, 0, 0, 0.5), inset 0 1px 1px rgba(255, 255, 255, 0.1)",
                 }}
               >
                 {isSubmitting ? (
-                  <div className="w-5 h-5 border-2 border-space-deep border-t-transparent rounded-full animate-spin" />
+                  <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
                 ) : (
                   isForgotPassword
-                    ? "RESET PASSWORD"
+                    ? "Send Reset Instructions"
                     : isSignUp
-                    ? "INITIALIZE ACCOUNT"
-                    : "AUTHENTICATE"
+                    ? "Create Account"
+                    : "Sign In"
                 )}
               </motion.button>
             </form>
@@ -285,23 +284,26 @@ export default function LoginPage() {
                   setError(null);
                   setInfoMessage(null);
                 }}
-                className="font-barlow text-sm text-silver-steel hover:text-cyan-electric transition-colors uppercase tracking-wider"
+                className="font-barlow text-sm text-silver-steel hover:text-white transition-colors"
                 disabled={isSubmitting}
               >
-                Return to authentication
+                Back to sign in
               </button>
             ) : (
-              <button
-                onClick={() => {
-                  setIsSignUp(!isSignUp);
-                  setError(null);
-                  setInfoMessage(null);
-                }}
-                className="font-barlow text-sm text-silver-steel hover:text-cyan-electric transition-colors uppercase tracking-wider"
-                disabled={isSubmitting}
-              >
-                {isSignUp ? "Return to authentication" : "Register new pilot"}
-              </button>
+              <p className="font-barlow text-sm text-silver-steel">
+                {isSignUp ? "Already have an account?" : "Don't have an account?"}{" "}
+                <button
+                  onClick={() => {
+                    setIsSignUp(!isSignUp);
+                    setError(null);
+                    setInfoMessage(null);
+                  }}
+                  className="text-white hover:underline transition-all"
+                  disabled={isSubmitting}
+                >
+                  {isSignUp ? "Sign in" : "Sign up"}
+                </button>
+              </p>
             )}
           </div>
         </div>
