@@ -77,14 +77,21 @@ export function ExpenseProvider({ children }: { children: ReactNode }) {
       orderBy("createdAt", "desc")
     );
 
-    const unsubscribe = onSnapshot(q, (snapshot) => {
-      const data: Expense[] = snapshot.docs.map((d) => ({
-        id: d.id,
-        ...d.data(),
-      })) as Expense[];
-      setExpenses(data);
-      setIsLoading(false);
-    });
+    const unsubscribe = onSnapshot(
+      q,
+      (snapshot) => {
+        const data: Expense[] = snapshot.docs.map((d) => ({
+          id: d.id,
+          ...d.data(),
+        })) as Expense[];
+        setExpenses(data);
+        setIsLoading(false);
+      },
+      (error) => {
+        console.error("Firestore onSnapshot error:", error);
+        alert(`Database Sync Error: ${error.message}`);
+      }
+    );
 
     return () => unsubscribe();
   }, [user]);
@@ -92,11 +99,16 @@ export function ExpenseProvider({ children }: { children: ReactNode }) {
   const addExpense = useCallback(
     async (expense: Omit<Expense, "id" | "userId" | "createdAt">) => {
       if (!user) return;
-      await addDoc(collection(db, "users", user.uid, "expenses"), {
-        ...expense,
-        userId: user.uid,
-        createdAt: Date.now(),
-      });
+      try {
+        await addDoc(collection(db, "users", user.uid, "expenses"), {
+          ...expense,
+          userId: user.uid,
+          createdAt: Date.now(),
+        });
+      } catch (error: any) {
+        console.error("Error adding expense:", error);
+        alert(`Failed to save expense: ${error.message}`);
+      }
     },
     [user]
   );
@@ -104,7 +116,12 @@ export function ExpenseProvider({ children }: { children: ReactNode }) {
   const deleteExpense = useCallback(
     async (id: string) => {
       if (!user) return;
-      await deleteDoc(doc(db, "users", user.uid, "expenses", id));
+      try {
+        await deleteDoc(doc(db, "users", user.uid, "expenses", id));
+      } catch (error: any) {
+        console.error("Error deleting expense:", error);
+        alert(`Failed to delete: ${error.message}`);
+      }
     },
     [user]
   );
