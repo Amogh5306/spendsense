@@ -2,7 +2,7 @@
 
 import { ReactNode, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import Starfield from "@/components/Starfield";
+import { BackgroundPaths } from "@/components/ui/background-paths";
 import Navbar from "@/components/Navbar";
 import ExpenseForm from "@/components/ExpenseForm";
 import { ExpenseProvider } from "@/context/ExpenseContext";
@@ -21,26 +21,18 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
 
   if (loading || !user) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <Starfield />
-        <div className="w-12 h-12 border-4 border-cyan-dim border-t-cyan-electric rounded-full animate-spin relative z-10" />
-      </div>
+      <BackgroundPaths>
+        <div className="w-12 h-12 border-4 border-white/10 border-t-teal-400 rounded-full animate-spin relative z-10" />
+      </BackgroundPaths>
     );
   }
 
   return (
     <ExpenseProvider>
       <div className="relative min-h-screen">
-        <Starfield />
-
-        {/* Diagonal grid overlay */}
-        <div
-          className="fixed inset-0 pointer-events-none opacity-[0.02] z-[1]"
-          style={{
-            backgroundImage:
-              "repeating-linear-gradient(15deg, transparent, transparent 60px, rgba(0,245,255,0.12) 60px, rgba(0,245,255,0.12) 61px)",
-          }}
-        />
+        <div className="fixed inset-0 pointer-events-none z-0">
+          <BackgroundPaths />
+        </div>
 
         <Navbar />
 

@@ -34,7 +34,11 @@ export default function ExpenseForm() {
       {/* FAB Button */}
       <button
         onClick={() => setIsOpen(true)}
-        className="fab-pulse"
+        className="fixed bottom-8 right-8 z-40 w-14 h-14 rounded-full flex items-center justify-center cursor-pointer shadow-lg transition-all duration-300 hover:scale-105"
+        style={{
+          background: "linear-gradient(135deg, #14b8a6, #0f766e)",
+          boxShadow: "0 8px 24px rgba(20, 184, 166, 0.4)",
+        }}
         aria-label="Add Expense"
       >
         <svg
@@ -59,7 +63,7 @@ export default function ExpenseForm() {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm"
+              className="fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-sm"
               onClick={() => setIsOpen(false)}
             />
             <motion.div
@@ -67,17 +71,17 @@ export default function ExpenseForm() {
               animate={{ x: 0 }}
               exit={{ x: "100%" }}
               transition={{ type: "spring", stiffness: 300, damping: 30 }}
-              className="fixed right-0 top-0 bottom-0 z-50 w-full max-w-md border-l border-cyan-dim overflow-y-auto"
-              style={{ background: "rgba(5, 10, 14, 0.95)", backdropFilter: "blur(20px)" }}
+              className="fixed right-0 top-0 bottom-0 z-50 w-full max-w-md border-l border-white/5 overflow-y-auto"
+              style={{ background: "rgba(11, 17, 32, 0.95)", backdropFilter: "blur(24px)" }}
             >
               <div className="p-8">
-                <div className="flex items-center justify-between mb-8">
-                  <h2 className="font-orbitron text-lg tracking-wider text-cyan-electric">
-                    NEW EXPENSE
+                <div className="flex items-center justify-between mb-8 border-b border-white/5 pb-4">
+                  <h2 className="font-barlow text-lg font-semibold text-ghost-white">
+                    Add Transaction
                   </h2>
                   <button
                     onClick={() => setIsOpen(false)}
-                    className="w-8 h-8 rounded-lg border border-cyan-dim flex items-center justify-center text-silver-steel hover:text-ghost-white hover:border-cyan-electric/40 transition-all"
+                    className="w-8 h-8 rounded-lg border border-white/10 flex items-center justify-center text-slate-400 hover:text-ghost-white hover:bg-white/5 transition-all"
                   >
                     ✕
                   </button>
@@ -86,23 +90,23 @@ export default function ExpenseForm() {
                 <form onSubmit={handleSubmit} className="space-y-6">
                   {/* Amount */}
                   <div>
-                    <label className="text-xs font-barlow font-semibold tracking-widest text-silver-steel block mb-2">
-                      AMOUNT (₹)
+                    <label className="text-sm font-barlow font-medium text-slate-400 block mb-2">
+                      Amount (₹)
                     </label>
                     <input
                       type="number"
                       value={amount}
                       onChange={(e) => setAmount(e.target.value)}
                       placeholder="0.00"
-                      className="input-glow text-2xl font-jetbrains glow-cyan"
+                      className="input-premium text-2xl font-semibold"
                       required
                     />
                   </div>
 
                   {/* Category pills */}
                   <div>
-                    <label className="text-xs font-barlow font-semibold tracking-widest text-silver-steel block mb-3">
-                      CATEGORY
+                    <label className="text-sm font-barlow font-medium text-slate-400 block mb-3">
+                      Category
                     </label>
                     <div className="flex flex-wrap gap-2">
                       {CATEGORIES.map((cat) => {
@@ -113,12 +117,11 @@ export default function ExpenseForm() {
                             key={cat}
                             type="button"
                             onClick={() => setCategory(cat)}
-                            className="cat-pill"
+                            className="px-4 py-2 rounded-full text-sm font-barlow font-medium cursor-pointer transition-all duration-300 border"
                             style={{
-                              borderColor: isActive ? color : "rgba(138, 155, 176, 0.2)",
-                              background: isActive ? `${color}20` : "transparent",
-                              color: isActive ? color : "#8A9BB0",
-                              boxShadow: isActive ? `0 0 15px ${color}40` : "none",
+                              borderColor: isActive ? color : "rgba(255, 255, 255, 0.1)",
+                              background: isActive ? `${color}15` : "transparent",
+                              color: isActive ? color : "#94a3b8",
                             }}
                           >
                             {cat}
@@ -130,43 +133,45 @@ export default function ExpenseForm() {
 
                   {/* Date */}
                   <div>
-                    <label className="text-xs font-barlow font-semibold tracking-widest text-silver-steel block mb-2">
-                      DATE
+                    <label className="text-sm font-barlow font-medium text-slate-400 block mb-2">
+                      Date
                     </label>
                     <input
                       type="date"
                       value={date}
                       onChange={(e) => setDate(e.target.value)}
-                      className="input-glow font-jetbrains"
+                      className="input-premium"
                     />
                   </div>
 
                   {/* Notes */}
                   <div>
-                    <label className="text-xs font-barlow font-semibold tracking-widest text-silver-steel block mb-2">
-                      NOTES
+                    <label className="text-sm font-barlow font-medium text-slate-400 block mb-2">
+                      Notes
                     </label>
                     <textarea
                       value={notes}
                       onChange={(e) => setNotes(e.target.value)}
-                      placeholder="What was this expense for?"
+                      placeholder="What was this for?"
                       rows={3}
-                      className="input-glow resize-none"
+                      className="input-premium resize-none"
                     />
                   </div>
 
                   {/* Submit */}
                   <motion.button
                     type="submit"
-                    whileHover={{ scale: 1.02 }}
-                    whileTap={{ scale: 0.98 }}
-                    className="w-full py-4 rounded-xl font-orbitron text-sm tracking-widest font-bold text-space-deep transition-all duration-300"
+                    whileHover={{ scale: 1.01 }}
+                    whileTap={{ scale: 0.99 }}
+                    className="w-full py-3.5 rounded-xl font-barlow text-[16px] font-semibold transition-all duration-300 mt-6 flex items-center justify-center gap-2"
                     style={{
-                      background: "#00F5FF",
-                      boxShadow: "0 0 30px rgba(0, 245, 255, 0.3)",
+                      background: "linear-gradient(180deg, #14b8a6 0%, #0f766e 100%)",
+                      border: "1px solid rgba(255, 255, 255, 0.2)",
+                      color: "#ffffff",
+                      boxShadow: "0 4px 12px rgba(20, 184, 166, 0.3), inset 0 1px 1px rgba(255, 255, 255, 0.2)",
                     }}
                   >
-                    🚀 LAUNCH EXPENSE
+                    Save Transaction
                   </motion.button>
                 </form>
               </div>

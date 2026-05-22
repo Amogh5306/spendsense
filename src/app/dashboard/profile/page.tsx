@@ -22,8 +22,8 @@ export default function ProfilePage() {
 
   return (
     <div className="max-w-2xl mx-auto space-y-8">
-      <h1 className="font-orbitron text-xl tracking-wider text-ghost-white">
-        PILOT <span className="text-cyan-electric">PROFILE</span>
+      <h1 className="font-barlow text-2xl font-semibold tracking-wide text-ghost-white">
+        Account <span className="text-teal-400">Profile</span>
       </h1>
 
       {/* Avatar section */}
@@ -33,13 +33,12 @@ export default function ProfilePage() {
         transition={{ delay: 0.1 }}
         className="glass-card p-8 flex flex-col items-center"
       >
-        {/* Avatar with orbital ring */}
+        {/* Avatar */}
         <div className="relative mb-6">
           <div
-            className="w-24 h-24 rounded-full flex items-center justify-center font-orbitron text-2xl font-bold text-space-deep"
+            className="w-24 h-24 rounded-full flex items-center justify-center font-barlow text-2xl font-bold text-white shadow-lg"
             style={{
-              background: "linear-gradient(135deg, #00F5FF, #00C4CC)",
-              boxShadow: "0 0 30px rgba(0, 245, 255, 0.3)",
+              background: "linear-gradient(135deg, #14b8a6, #0f766e)",
             }}
           >
             {name
@@ -49,29 +48,11 @@ export default function ProfilePage() {
               .toUpperCase()
               .slice(0, 2)}
           </div>
-          {/* Orbital ring */}
-          <div
-            className="absolute -inset-3 rounded-full border-2 border-dashed animate-spin"
-            style={{
-              borderColor: "rgba(0, 245, 255, 0.2)",
-              animationDuration: "12s",
-            }}
-          />
-          {/* Orbiting dot */}
-          <div
-            className="absolute -inset-3 rounded-full animate-spin"
-            style={{ animationDuration: "4s" }}
-          >
-            <div
-              className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 w-2 h-2 rounded-full bg-cyan-electric"
-              style={{ boxShadow: "0 0 8px rgba(0, 245, 255, 0.6)" }}
-            />
-          </div>
         </div>
 
-        <p className="font-orbitron text-lg text-ghost-white">{name}</p>
-        <p className="font-barlow text-xs text-silver-steel tracking-widest mt-1">
-          STATION COMMANDER
+        <p className="font-barlow text-lg font-semibold text-ghost-white">{name}</p>
+        <p className="font-barlow text-sm text-slate-400 mt-1">
+          Premium Member
         </p>
       </motion.div>
 
@@ -82,27 +63,27 @@ export default function ProfilePage() {
         transition={{ delay: 0.2 }}
         className="glass-card p-8 space-y-6"
       >
-        <h3 className="font-orbitron text-xs tracking-widest text-silver-steel">
-          COCKPIT SETTINGS
+        <h3 className="font-barlow text-sm font-medium tracking-wide text-slate-400 border-b border-white/5 pb-2">
+          Account Settings
         </h3>
 
         {/* Display name */}
         <div>
-          <label className="text-xs font-barlow font-semibold tracking-widest text-silver-steel block mb-2">
-            DISPLAY NAME
+          <label className="text-sm font-barlow text-ghost-white block mb-2">
+            Display Name
           </label>
           <input
             type="text"
             value={name}
             onChange={(e) => setName(e.target.value)}
-            className="input-glow"
+            className="input-premium"
           />
         </div>
 
         {/* Budget slider */}
         <div>
-          <label className="text-xs font-barlow font-semibold tracking-widest text-silver-steel block mb-2">
-            MONTHLY BUDGET
+          <label className="text-sm font-barlow text-ghost-white block mb-2">
+            Monthly Budget Goal
           </label>
           <div className="flex items-center gap-4">
             <input
@@ -112,20 +93,20 @@ export default function ProfilePage() {
               step="500"
               value={budget}
               onChange={(e) => setBudget(Number(e.target.value))}
-              className="flex-1 h-2 rounded-full appearance-none cursor-pointer"
+              className="flex-1 h-2 rounded-full appearance-none cursor-pointer bg-slate-800"
               style={{
-                background: `linear-gradient(to right, #00F5FF ${((budget - 1000) / 49000) * 100}%, rgba(138,155,176,0.2) ${((budget - 1000) / 49000) * 100}%)`,
+                background: `linear-gradient(to right, #2dd4bf ${((budget - 1000) / 49000) * 100}%, rgba(255,255,255,0.05) ${((budget - 1000) / 49000) * 100}%)`,
               }}
             />
-            <span className="font-jetbrains text-lg font-bold glow-cyan w-28 text-right">
+            <span className="font-barlow text-lg font-bold text-teal-400 w-28 text-right">
               ₹{budget.toLocaleString("en-IN")}
             </span>
           </div>
           <div className="flex justify-between mt-1">
-            <span className="font-jetbrains text-[10px] text-silver-steel">
+            <span className="font-barlow text-[11px] text-slate-500">
               ₹1,000
             </span>
-            <span className="font-jetbrains text-[10px] text-silver-steel">
+            <span className="font-barlow text-[11px] text-slate-500">
               ₹50,000
             </span>
           </div>
@@ -134,18 +115,17 @@ export default function ProfilePage() {
         {/* Save button */}
         <motion.button
           onClick={handleSave}
-          whileHover={{ scale: 1.02 }}
-          whileTap={{ scale: 0.98 }}
-          className="w-full py-4 rounded-xl font-orbitron text-sm tracking-widest font-bold transition-all duration-300"
+          whileHover={{ scale: 1.01 }}
+          whileTap={{ scale: 0.99 }}
+          className="w-full py-3.5 rounded-xl font-barlow text-[16px] font-semibold transition-all duration-300 mt-4 flex items-center justify-center gap-2"
           style={{
-            background: saved ? "#B8FF00" : "#00F5FF",
-            color: "#050A0E",
-            boxShadow: saved
-              ? "0 0 30px rgba(184, 255, 0, 0.4)"
-              : "0 0 30px rgba(0, 245, 255, 0.3)",
+            background: saved ? "#10b981" : "linear-gradient(180deg, #1f2937 0%, #111827 100%)",
+            border: saved ? "1px solid #10b981" : "1px solid rgba(255, 255, 255, 0.1)",
+            color: "#ffffff",
+            boxShadow: saved ? "0 4px 12px rgba(16, 185, 129, 0.3)" : "0 4px 12px rgba(0, 0, 0, 0.5), inset 0 1px 1px rgba(255, 255, 255, 0.1)",
           }}
         >
-          {saved ? "✓ SAVED" : "SAVE CONFIGURATION"}
+          {saved ? "✓ Saved successfully" : "Save Changes"}
         </motion.button>
       </motion.div>
 
@@ -161,10 +141,9 @@ export default function ProfilePage() {
             await signOut();
             router.push("/");
           }}
-          className="px-8 py-3 rounded-xl font-orbitron text-xs tracking-widest font-bold border border-red-500/30 text-red-400 hover:bg-red-500/10 transition-all duration-300"
-          style={{ textShadow: "0 0 10px rgba(255,60,60,0.5)" }}
+          className="px-6 py-2.5 rounded-lg font-barlow text-sm font-medium border border-red-500/20 text-red-400 hover:bg-red-500/10 transition-all duration-300"
         >
-          DISCONNECT SESSION
+          Sign Out
         </button>
       </motion.div>
 

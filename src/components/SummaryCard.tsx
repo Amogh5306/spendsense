@@ -9,7 +9,6 @@ interface SummaryCardProps {
   prefix?: string;
   suffix?: string;
   glowColor: string;
-  borderColor: string;
   icon: React.ReactNode;
   delay: number;
 }
@@ -20,40 +19,24 @@ export default function SummaryCard({
   prefix = "₹",
   suffix = "",
   glowColor,
-  borderColor,
   icon,
   delay,
 }: SummaryCardProps) {
   return (
     <motion.div
-      initial={{ opacity: 0, y: 30, rotateX: 10 }}
-      animate={{ opacity: 1, y: 0, rotateX: 0 }}
-      transition={{ duration: 0.6, delay, ease: [0.22, 1, 0.36, 1] }}
-      className="tilt-card"
-      style={{ perspective: "1000px" }}
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5, delay, ease: [0.22, 1, 0.36, 1] }}
     >
       <div
-        className="glass-card p-6 animate-float-slow"
+        className="glass-card p-6 transition-all duration-300 hover:scale-[1.02]"
         style={{
-          animationDelay: `${delay * 2}s`,
-          borderColor,
-          boxShadow: `0 20px 60px rgba(0,0,0,0.4), 0 0 25px ${glowColor}`,
+          boxShadow: `0 8px 32px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.05)`,
         }}
       >
-        {/* Scanline overlay */}
-        <div className="absolute inset-0 overflow-hidden rounded-2xl pointer-events-none">
-          <div
-            className="absolute inset-0 opacity-[0.03]"
-            style={{
-              background:
-                "repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,245,255,0.1) 2px, rgba(0,245,255,0.1) 4px)",
-            }}
-          />
-        </div>
-
         <div className="relative z-10">
           <div className="flex items-center justify-between mb-4">
-            <span className="text-xs font-barlow font-semibold tracking-widest text-silver-steel uppercase">
+            <span className="text-sm font-barlow font-medium text-slate-400">
               {title}
             </span>
             <div
@@ -64,7 +47,7 @@ export default function SummaryCard({
             </div>
           </div>
 
-          <div className="font-jetbrains text-3xl font-bold glow-cyan">
+          <div className="font-barlow text-3xl font-semibold text-ghost-white summary-value">
             <CountUp end={value} prefix={prefix} suffix={suffix} />
           </div>
         </div>

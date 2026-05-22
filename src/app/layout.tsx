@@ -22,9 +22,9 @@ const barlow = Barlow_Condensed({
 });
 
 export const metadata: Metadata = {
-  title: "SpendSense — Mission Control for Your Finances",
+  title: "SpendSense — Premium Expense Tracking",
   description:
-    "A futuristic expense tracking dashboard for students. Monitor your spending from orbit.",
+    "A clean, elegant, and secure expense tracking dashboard to manage your finances.",
 };
 
 import { AuthProvider } from "@/context/AuthContext";

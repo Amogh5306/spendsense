@@ -53,7 +53,7 @@ export default function LoginPage() {
 
     if (isForgotPassword) {
       if (!email) {
-        setError("Please provide your pilot ID (email) to reset password.");
+        setError("Please provide your email to reset password.");
         return;
       }
       setError(null);
@@ -67,7 +67,7 @@ export default function LoginPage() {
       } catch (err: any) { // eslint-disable-line @typescript-eslint/no-explicit-any
         let errorMsg = "Password reset failed.";
         if (err.code === "auth/user-not-found") {
-          errorMsg = "No pilot registered with this ID.";
+          errorMsg = "No account registered with this email.";
         } else if (err.code === "auth/invalid-email") {
           errorMsg = "Invalid email format.";
         } else if (err.code) {
@@ -104,13 +104,13 @@ export default function LoginPage() {
       // Clean up firebase error messages
       let errorMsg = "Authentication failed.";
       if (err.code === "auth/invalid-credential" || err.code === "auth/wrong-password") {
-        errorMsg = "Invalid pilot credentials. Access denied.";
+        errorMsg = "Invalid credentials. Access denied.";
       } else if (err.code === "auth/email-already-in-use") {
-        errorMsg = "This pilot is already registered.";
+        errorMsg = "This email is already registered.";
       } else if (err.code === "auth/weak-password") {
-        errorMsg = "Security protocol failure. Password must be at least 6 characters.";
+        errorMsg = "Password must be at least 6 characters.";
       } else if (err.code === "auth/email-not-verified") {
-        errorMsg = "Access restricted. Please verify your email via the link sent to your inbox.";
+        errorMsg = "Please verify your email via the link sent to your inbox.";
       } else if (err.code) {
         errorMsg = err.message;
       }
