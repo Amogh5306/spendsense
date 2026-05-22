@@ -9,9 +9,8 @@ import {
   signOut as firebaseSignOut,
   sendEmailVerification,
   sendPasswordResetEmail,
-  RecaptchaVerifier,
-  signInWithPhoneNumber,
-  ConfirmationResult,
+  GoogleAuthProvider,
+  signInWithPopup,
 } from "firebase/auth";
 import { auth } from "@/lib/firebase";
 
@@ -23,9 +22,7 @@ interface AuthContextType {
   signOut: () => Promise<void>;
   resendVerification: () => Promise<void>;
   resetPassword: (email: string) => Promise<void>;
-  setUpRecaptcha: (containerId: string) => void;
-  requestOTP: (phoneNumber: string) => Promise<void>;
-  verifyOTP: (otp: string) => Promise<void>;
+  signInWithGoogle: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType>({} as AuthContextType);
@@ -33,11 +30,6 @@ const AuthContext = createContext<AuthContextType>({} as AuthContextType);
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
-  
-  // State to hold the RecaptchaVerifier instance
-  const [recaptchaVerifier, setRecaptchaVerifier] = useState<RecaptchaVerifier | null>(null);
-  // State to hold the ConfirmationResult instance
-  const [confirmationResult, setConfirmationResult] = useState<ConfirmationResult | null>(null);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
@@ -75,32 +67,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     await sendPasswordResetEmail(auth, email);
   };
 
-  const setUpRecaptcha = (containerId: string) => {
-    if (!recaptchaVerifier) {
-      const verifier = new RecaptchaVerifier(auth, containerId, {
-        size: "invisible",
-      });
-      setRecaptchaVerifier(verifier);
-    }
-  };
-
-  const requestOTP = async (phoneNumber: string) => {
-    if (!recaptchaVerifier) {
-      throw new Error("Recaptcha is not initialized.");
-    }
-    const result = await signInWithPhoneNumber(auth, phoneNumber, recaptchaVerifier);
-    setConfirmationResult(result);
-  };
-
-  const verifyOTP = async (otp: string) => {
-    if (!confirmationResult) {
-      throw new Error("OTP request not found.");
-    }
-    await confirmationResult.confirm(otp);
+  const signInWithGoogle = async () => {
+    const provider = new GoogleAuthProvider();
+    await signInWithPopup(auth, provider);
   };
 
   return (
-    <AuthContext.Provider value={{ user, loading, signIn, signUp, signOut, resendVerification, resetPassword, setUpRecaptcha, requestOTP, verifyOTP }}>
+    <AuthContext.Provider value={{ user, loading, signIn, signUp, signOut, resendVerification, resetPassword, signInWithGoogle }}>
       {children}
     </AuthContext.Provider>
   );

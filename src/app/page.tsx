@@ -1,21 +1,10 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import { BackgroundPaths } from "@/components/ui/background-paths";
 import { useAuth } from "@/context/AuthContext";
-
-const COUNTRY_CODES = [
-  { code: "+1", label: "US/CA (+1)" },
-  { code: "+44", label: "UK (+44)" },
-  { code: "+91", label: "IN (+91)" },
-  { code: "+61", label: "AU (+61)" },
-  { code: "+81", label: "JP (+81)" },
-  { code: "+49", label: "DE (+49)" },
-  { code: "+33", label: "FR (+33)" },
-  { code: "+971", label: "AE (+971)" },
-];
 
 export default function LoginPage() {
   // Email Auth State
@@ -24,23 +13,14 @@ export default function LoginPage() {
   const [isSignUp, setIsSignUp] = useState(false);
   const [isForgotPassword, setIsForgotPassword] = useState(false);
   
-  // Phone Auth State
-  const [loginMode, setLoginMode] = useState<"email" | "phone">("email");
-  const [countryCode, setCountryCode] = useState("+1");
-  const [phoneNumber, setPhoneNumber] = useState("");
-  const [otp, setOtp] = useState("");
-  const [otpSent, setOtpSent] = useState(false);
-  
   // Shared State
   const [error, setError] = useState<string | null>(null);
   const [infoMessage, setInfoMessage] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   
   const router = useRouter();
-  const { user, signIn, signUp, loading, resetPassword, setUpRecaptcha, requestOTP, verifyOTP } = useAuth();
+  const { user, signIn, signUp, loading, resetPassword, signInWithGoogle } = useAuth();
   
-  const recaptchaContainerRef = useRef<HTMLDivElement>(null);
-
   // If user is already logged in, push to dashboard
   useEffect(() => {
     if (user && !loading) {
@@ -48,56 +28,24 @@ export default function LoginPage() {
     }
   }, [user, loading, router]);
 
-  // Set up Recaptcha once on mount
-  useEffect(() => {
-    if (!loading) {
-      setUpRecaptcha("recaptcha-container");
-    }
-  }, [loading, setUpRecaptcha]);
-
-  const handlePhoneSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleGoogleSubmit = async () => {
     setError(null);
     setInfoMessage(null);
     setIsSubmitting(true);
-
+    
     try {
-      if (!otpSent) {
-        if (!phoneNumber) {
-          setError("Please enter a valid comms frequency (phone number).");
-          setIsSubmitting(false);
-          return;
-        }
-        
-        const fullNumber = `${countryCode}${phoneNumber}`;
-        await requestOTP(fullNumber);
-        
-        setOtpSent(true);
-        setInfoMessage("Transmission sent. Enter the 6-digit confirmation code.");
-      } else {
-        if (!otp || otp.length !== 6) {
-          setError("Invalid code format. Expecting 6 digits.");
-          setIsSubmitting(false);
-          return;
-        }
-        
-        await verifyOTP(otp);
-      }
+      await signInWithGoogle();
+      // Router push is handled by useEffect when 'user' changes
     } catch (err: any) { // eslint-disable-line @typescript-eslint/no-explicit-any
-      let errorMsg = "Signal interference. Action failed.";
-      if (err.code === "auth/invalid-phone-number") {
-        errorMsg = "Invalid frequency format. Check your phone number.";
-      } else if (err.code === "auth/too-many-requests") {
-        errorMsg = "Too many attempts. Comms locked temporarily.";
-      } else if (err.code === "auth/invalid-verification-code") {
-        errorMsg = "Incorrect authorization code.";
+      let errorMsg = "Google authentication failed.";
+      if (err.code === "auth/popup-closed-by-user") {
+        errorMsg = "Login window was closed before completion.";
       } else if (err.code) {
         errorMsg = err.message;
       }
       setError(errorMsg);
+      setIsSubmitting(false);
     }
-    
-    setIsSubmitting(false);
   };
 
   const handleEmailSubmit = async (e: React.FormEvent) => {
@@ -181,9 +129,6 @@ export default function LoginPage() {
 
   return (
     <BackgroundPaths>
-      {/* Invisible reCAPTCHA container required for Phone Auth */}
-      <div id="recaptcha-container" ref={recaptchaContainerRef} className="hidden"></div>
-
       {/* Floating login card */}
       <motion.div
         initial={{ opacity: 0, y: 40, scale: 0.95 }}
@@ -205,14 +150,39 @@ export default function LoginPage() {
               <span className="glow-cyan">SENSE</span>
             </h1>
             <p className="font-barlow text-silver-steel text-sm tracking-widest uppercase">
-              {loginMode === "phone" 
-                ? (otpSent ? "Enter authorization code" : "Establish secure comms link") 
-                : (isForgotPassword ? "Reset authorization code" : "Enter clearance credentials")}
+              {isForgotPassword ? "Reset authorization code" : "Enter clearance credentials"}
             </p>
           </div>
 
           {/* Form Content */}
-          {loginMode === "email" ? (
+          <div className="space-y-5">
+            {!isForgotPassword && !isSignUp && (
+              <>
+                <motion.button
+                  type="button"
+                  onClick={handleGoogleSubmit}
+                  disabled={isSubmitting}
+                  whileHover={!isSubmitting ? { scale: 1.02 } : {}}
+                  whileTap={!isSubmitting ? { scale: 0.98 } : {}}
+                  className="w-full py-4 rounded-xl font-orbitron text-sm tracking-widest font-bold transition-all duration-300 flex items-center justify-center gap-3 bg-white text-black hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
+                    <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+                    <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
+                    <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
+                  </svg>
+                  SIGN IN WITH GOOGLE
+                </motion.button>
+                
+                <div className="flex items-center gap-4 py-2">
+                  <div className="flex-1 h-px bg-white/10"></div>
+                  <span className="font-orbitron text-xs text-white/30 tracking-widest">OR EMAIL</span>
+                  <div className="flex-1 h-px bg-white/10"></div>
+                </div>
+              </>
+            )}
+
             <form onSubmit={handleEmailSubmit} className="space-y-5">
               <div>
                 <label className="text-xs font-barlow font-semibold tracking-widest text-silver-steel block mb-2">
@@ -304,171 +274,33 @@ export default function LoginPage() {
                 )}
               </motion.button>
             </form>
-          ) : (
-            <form onSubmit={handlePhoneSubmit} className="space-y-5">
-              {!otpSent ? (
-                <div>
-                  <label className="text-xs font-barlow font-semibold tracking-widest text-silver-steel block mb-2">
-                    COMMS FREQUENCY (PHONE)
-                  </label>
-                  <div className="flex gap-2">
-                    <select
-                      value={countryCode}
-                      onChange={(e) => setCountryCode(e.target.value)}
-                      disabled={isSubmitting}
-                      className="input-glow w-1/3 appearance-none cursor-pointer bg-[#0A1622] text-silver-steel"
-                    >
-                      {COUNTRY_CODES.map((c) => (
-                        <option key={c.code} value={c.code}>
-                          {c.label}
-                        </option>
-                      ))}
-                    </select>
-                    <input
-                      type="tel"
-                      value={phoneNumber}
-                      onChange={(e) => setPhoneNumber(e.target.value)}
-                      placeholder="1234567890"
-                      className="input-glow w-2/3"
-                      disabled={isSubmitting}
-                    />
-                  </div>
-                </div>
-              ) : (
-                <div>
-                  <div className="flex justify-between items-center mb-2">
-                    <label className="text-xs font-barlow font-semibold tracking-widest text-silver-steel block">
-                      TRANSMISSION CODE (OTP)
-                    </label>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setOtpSent(false);
-                        setOtp("");
-                        setError(null);
-                        setInfoMessage(null);
-                      }}
-                      className="text-[10px] font-barlow text-silver-steel hover:text-cyan-electric tracking-wider uppercase transition-colors"
-                    >
-                      Change frequency?
-                    </button>
-                  </div>
-                  <input
-                    type="text"
-                    value={otp}
-                    onChange={(e) => setOtp(e.target.value)}
-                    placeholder="123456"
-                    maxLength={6}
-                    className="input-glow text-center tracking-[0.5em] font-orbitron text-lg"
-                    disabled={isSubmitting}
-                  />
-                </div>
-              )}
-
-              {error && (
-                <motion.div 
-                  initial={{ opacity: 0, height: 0 }}
-                  animate={{ opacity: 1, height: "auto" }}
-                  className="text-red-400 font-barlow text-sm font-semibold tracking-wide text-center"
-                  style={{ textShadow: "0 0 10px rgba(255,60,60,0.4)" }}
-                >
-                  ⚠ {error}
-                </motion.div>
-              )}
-
-              {infoMessage && (
-                <motion.div 
-                  initial={{ opacity: 0, height: 0 }}
-                  animate={{ opacity: 1, height: "auto" }}
-                  className="text-lime-400 font-barlow text-sm font-semibold tracking-wide text-center"
-                  style={{ textShadow: "0 0 10px rgba(184,255,0,0.4)" }}
-                >
-                  ✓ {infoMessage}
-                </motion.div>
-              )}
-
-              <motion.button
-                type="submit"
-                disabled={isSubmitting}
-                whileHover={!isSubmitting ? { scale: 1.02 } : {}}
-                whileTap={!isSubmitting ? { scale: 0.98 } : {}}
-                className="w-full py-4 rounded-xl font-orbitron text-sm tracking-widest font-bold transition-all duration-300 mt-4 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-                style={{
-                  background: "#00F5FF",
-                  color: "#050A0E",
-                  boxShadow: isSubmitting ? "none" : "0 0 30px rgba(0, 245, 255, 0.4)",
-                }}
-              >
-                {isSubmitting ? (
-                  <div className="w-5 h-5 border-2 border-space-deep border-t-transparent rounded-full animate-spin" />
-                ) : (
-                  otpSent ? "VERIFY TRANSMISSION" : "REQUEST LINK"
-                )}
-              </motion.button>
-            </form>
-          )}
+          </div>
 
           {/* Bottom Switcher */}
           <div className="mt-6 flex flex-col gap-3 text-center">
-            {loginMode === "email" ? (
-              <>
-                {isForgotPassword ? (
-                  <button
-                    onClick={() => {
-                      setIsForgotPassword(false);
-                      setError(null);
-                      setInfoMessage(null);
-                    }}
-                    className="font-barlow text-sm text-silver-steel hover:text-cyan-electric transition-colors uppercase tracking-wider"
-                    disabled={isSubmitting}
-                  >
-                    Return to authentication
-                  </button>
-                ) : (
-                  <button
-                    onClick={() => {
-                      setIsSignUp(!isSignUp);
-                      setError(null);
-                      setInfoMessage(null);
-                    }}
-                    className="font-barlow text-sm text-silver-steel hover:text-cyan-electric transition-colors uppercase tracking-wider"
-                    disabled={isSubmitting}
-                  >
-                    {isSignUp ? "Return to authentication" : "Register new pilot"}
-                  </button>
-                )}
-                
-                <div className="flex items-center gap-4 py-2">
-                  <div className="flex-1 h-px bg-white/10"></div>
-                  <span className="font-orbitron text-xs text-white/30 tracking-widest">OR</span>
-                  <div className="flex-1 h-px bg-white/10"></div>
-                </div>
-                
-                <button
-                  onClick={() => {
-                    setLoginMode("phone");
-                    setError(null);
-                    setInfoMessage(null);
-                  }}
-                  className="font-barlow text-sm text-cyan-electric/70 hover:text-cyan-electric transition-colors uppercase tracking-wider font-semibold"
-                  disabled={isSubmitting}
-                >
-                  Use Subspace Comms (Phone Login)
-                </button>
-              </>
-            ) : (
+            {isForgotPassword ? (
               <button
                 onClick={() => {
-                  setLoginMode("email");
-                  setOtpSent(false);
-                  setOtp("");
+                  setIsForgotPassword(false);
                   setError(null);
                   setInfoMessage(null);
                 }}
                 className="font-barlow text-sm text-silver-steel hover:text-cyan-electric transition-colors uppercase tracking-wider"
                 disabled={isSubmitting}
               >
-                Return to Email Login
+                Return to authentication
+              </button>
+            ) : (
+              <button
+                onClick={() => {
+                  setIsSignUp(!isSignUp);
+                  setError(null);
+                  setInfoMessage(null);
+                }}
+                className="font-barlow text-sm text-silver-steel hover:text-cyan-electric transition-colors uppercase tracking-wider"
+                disabled={isSubmitting}
+              >
+                {isSignUp ? "Return to authentication" : "Register new pilot"}
               </button>
             )}
           </div>
