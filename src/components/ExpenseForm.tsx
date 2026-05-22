@@ -36,8 +36,8 @@ export default function ExpenseForm() {
         onClick={() => setIsOpen(true)}
         className="fixed bottom-8 right-8 z-40 w-14 h-14 rounded-full flex items-center justify-center cursor-pointer shadow-lg transition-all duration-300 hover:scale-105"
         style={{
-          background: "linear-gradient(135deg, #14b8a6, #0f766e)",
-          boxShadow: "0 8px 24px rgba(20, 184, 166, 0.4)",
+          background: "linear-gradient(135deg, #10b981, #8b5cf6, #38bdf8)",
+          boxShadow: "0 8px 24px rgba(139, 92, 246, 0.4)",
         }}
         aria-label="Add Expense"
       >

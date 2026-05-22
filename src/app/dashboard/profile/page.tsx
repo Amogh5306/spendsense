@@ -38,7 +38,7 @@ export default function ProfilePage() {
           <div
             className="w-24 h-24 rounded-full flex items-center justify-center font-barlow text-2xl font-bold text-white shadow-lg"
             style={{
-              background: "linear-gradient(135deg, #14b8a6, #0f766e)",
+              background: "linear-gradient(135deg, #10b981, #8b5cf6, #38bdf8)",
             }}
           >
             {name

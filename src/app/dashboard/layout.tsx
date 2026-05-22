@@ -2,7 +2,6 @@
 
 import { ReactNode, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { BackgroundPaths } from "@/components/ui/background-paths";
 import Navbar from "@/components/Navbar";
 import ExpenseForm from "@/components/ExpenseForm";
 import { ExpenseProvider } from "@/context/ExpenseContext";
@@ -21,19 +20,15 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
 
   if (loading || !user) {
     return (
-      <BackgroundPaths>
+      <div className="min-h-screen flex items-center justify-center">
         <div className="w-12 h-12 border-4 border-white/10 border-t-teal-400 rounded-full animate-spin relative z-10" />
-      </BackgroundPaths>
+      </div>
     );
   }
 
   return (
     <ExpenseProvider>
       <div className="relative min-h-screen">
-        <div className="fixed inset-0 pointer-events-none z-0">
-          <BackgroundPaths />
-        </div>
-
         <Navbar />
 
         <main className="relative z-10 pt-20 pb-24 px-4 sm:px-6 max-w-7xl mx-auto">

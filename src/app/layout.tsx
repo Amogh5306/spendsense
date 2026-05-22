@@ -40,6 +40,7 @@ export default function RootLayout({
       className={`${orbitron.variable} ${jetbrains.variable} ${barlow.variable}`}
     >
       <body className="font-barlow text-ghost-white antialiased">
+        <div className="noise-overlay" />
         <AuthProvider>
           {children}
         </AuthProvider>
